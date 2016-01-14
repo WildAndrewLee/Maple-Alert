@@ -60,28 +60,28 @@ class Bot(object):
                         'You have been removed from the alert list.'
                     )
             elif any([m == self.client.user for m in message.mentions]):
-                    if 'subscribe' in message.content:
-                        add_user(message.author)
-                        self.client.send_message(
-                            message.author,
-                            dedent(
-                                '''
-                                You are now on the alert list.
-                                Send "cancel" in private message to remove yourself from the list.
-                                '''
-                            ).strip()
-                        )
+                if 'subscribe' in message.content:
+                    add_user(message.author)
+                    self.client.send_message(
+                        message.author,
+                        dedent(
+                            '''
+                            You are now on the alert list.
+                            Send "cancel" in private message to remove yourself from the list.
+                            '''
+                        ).strip()
+                    )
 
-                    if 'help' in message.content:
-                        self.client.send_message(
-                            message.channel,
-                            dedent(
-                                '''
-                                This bot will PM you when MapleStory is back online.
-                                All inquiries should be sent to Reticence via PM.
-                                '''
-                            ).strip()
-                        )
+                if 'help' in message.content:
+                    self.client.send_message(
+                        message.channel,
+                        dedent(
+                            '''
+                            This bot will PM you when MapleStory is back online.
+                            All inquiries should be sent to Reticence via PM.
+                            '''
+                        ).strip()
+                    )
 
         thread = Thread(target=self.client.run)
         thread.daemon = True
