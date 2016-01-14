@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 import sys
 import time
@@ -22,7 +23,8 @@ def check(address):
     ping = subprocess.check_output('which ping', shell=True).strip()
     cmd = ping_cmd.format(**locals())
 
-    if __DEBUG__: print cmd
+    if __DEBUG__:
+        print(cmd)
 
     try:
         subprocess.check_output(cmd, shell=True)
@@ -50,6 +52,7 @@ class Bot(object):
     def run(self):
         self.client.login(secrets.email, secrets.password)
 
+        @asyncio.coroutine
         @self.client.event
         def on_message(message):
             if message.channel.is_private:
@@ -89,10 +92,13 @@ class Bot(object):
 
         while True:
             if all([check(addr) for addr in login_address]):
-                if __DEBUG__: print 'maple online'
+                if __DEBUG__:
+                    print('maple online')
+
                 self.alert()
             else:
-                if __DEBUG__: print 'not online'
+                if __DEBUG__:
+                    print('not online')
             
             time.sleep(delay)
 
