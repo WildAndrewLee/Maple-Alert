@@ -82,6 +82,10 @@ class Bot(object):
                             '''
                             This bot will PM you when MapleStory is back online.
                             All inquiries should be sent to Reticence via PM.
+
+                            Usage:
+                            @Maple Alert subscribe
+                            @Maple Alert help
                             '''
                         ).strip()
                     )
