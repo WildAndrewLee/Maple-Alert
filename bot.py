@@ -23,7 +23,7 @@ def check(address):
     port = address.split(':')[1]
     
     try:
-        s = socket.create_connection((addr, port))
+        s = socket.create_connection((addr, port), 0.5)
         s.close()
         return True
     except:
@@ -88,7 +88,7 @@ def check_servers():
         # let the discord client connect
         # time.sleep(delay)
 
-        if all([check(addr) for addr in login_address]):
+        if any([check(addr) for addr in login_address]):
             if __DEBUG__:
                 print('maple online')
 
