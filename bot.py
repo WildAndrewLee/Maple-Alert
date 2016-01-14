@@ -20,7 +20,7 @@ delay = 15000 # 15000ms or 15s
 ping_cmd = '{ping} -c 1 {address}'
 
 def check(address):
-    ping = subprocess.check_output('which ping', shell=True).strip()
+    ping = str(subprocess.check_output('which ping', shell=True)).strip()
     cmd = ping_cmd.format(**locals())
 
     if __DEBUG__:
