@@ -1,12 +1,12 @@
 import redis
 
-__db = redis.Redis('localhost')
+__db = redis.Redis('localhost', decode_responses=True)
 
 def add_user(user):
     __db.append('to_notify', ' ' + str(user.id))
 
 def get_users():
-    users = str(__db.get('to_notify'))
+    users = __db.get('to_notify')
     return users.strip().split(' ') if users is not None else []
 
 def clear_users():
@@ -21,3 +21,6 @@ def remove_user(user):
         pass
 
     __db.set('to_notify', ' '.join(users))
+
+if __name__ == '__main__':
+    print(get_users())

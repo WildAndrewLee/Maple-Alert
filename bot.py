@@ -1,5 +1,5 @@
 import asyncio
-import subprocess
+import socket
 import sys
 import time
 from threading import Thread
@@ -16,95 +16,89 @@ elif '-d' in sys.argv:
 else:
     __DEBUG__ = False
 
-delay = 15000 # 15000ms or 15s
-ping_cmd = '{ping} -c 1 {address}'
+delay = 5 # 5 seconds
 
 def check(address):
-    ping = str(subprocess.check_output('which ping', shell=True)).strip()
-    cmd = ping_cmd.format(**locals())
-
-    if __DEBUG__:
-        print(cmd)
-
+    addr = address.split(':')[0]
+    port = address.split(':')[1]
+    
     try:
-        subprocess.check_output(cmd, shell=True)
+        s = socket.create_connection((addr, port))
+        s.close()
         return True
     except:
-        return False        
+        import traceback
+        traceback.print_exc()
+        return False
 
-class Bot(object):
-    server = None
-    channel = None
-    client = None
+client = Client()
+client.login(secrets.email, secrets.password)
 
-    def __init__(self):
-        self.client = Client()
+@asyncio.coroutine
+@client.event
+def on_alert():
+    users = get_users()
 
-    def alert(self):
-        users = get_users()
+    for user in users:
+        user = User('', user, '', '')
+        client.send_message(user, 'MapleStory is back online!')
 
-        for user in users:
-            user = User('', user, '', '')
-            self.client.send_message(user, 'MapleStory is back online!')
+    clear_users()
 
-        clear_users()
+@asyncio.coroutine
+@client.event
+def on_message(message):
+    if message.channel.is_private:
+        if message.content == 'cancel':
+            remove_user(message.author)
+            client.send_message(
+                message.author,
+                'You have been removed from the alert list.'
+            )
+    elif any([m == client.user for m in message.mentions]):
+        if 'subscribe' in message.content:
+            add_user(message.author)
+            client.send_message(
+                message.author,
+                dedent(
+                    '''
+                    You are now on the alert list.
+                    Send "cancel" in private message to remove yourself from the list.
+                    '''
+                ).strip()
+            )
 
-    def run(self):
-        self.client.login(secrets.email, secrets.password)
+        if 'help' in message.content:
+            client.send_message(
+                message.channel,
+                dedent(
+                    '''
+                    This bot will PM you when MapleStory is back online.
+                    All inquiries should be sent to Reticence via PM.
 
-        @asyncio.coroutine
-        @self.client.event
-        def on_message(message):
-            if message.channel.is_private:
-                if message.content == 'cancel':
-                    remove_user(message.author)
-                    self.client.send_message(
-                        message.author,
-                        'You have been removed from the alert list.'
-                    )
-            elif any([m == self.client.user for m in message.mentions]):
-                if 'subscribe' in message.content:
-                    add_user(message.author)
-                    self.client.send_message(
-                        message.author,
-                        dedent(
-                            '''
-                            You are now on the alert list.
-                            Send "cancel" in private message to remove yourself from the list.
-                            '''
-                        ).strip()
-                    )
+                    Usage:
+                    @Maple Alert subscribe
+                    @Maple Alert help
+                    '''
+                ).strip()
+            )
 
-                if 'help' in message.content:
-                    self.client.send_message(
-                        message.channel,
-                        dedent(
-                            '''
-                            This bot will PM you when MapleStory is back online.
-                            All inquiries should be sent to Reticence via PM.
+def check_servers():
+    while True:
+        # let the discord client connect
+        # time.sleep(delay)
 
-                            Usage:
-                            @Maple Alert subscribe
-                            @Maple Alert help
-                            '''
-                        ).strip()
-                    )
+        if all([check(addr) for addr in login_address]):
+            if __DEBUG__:
+                print('maple online')
 
-        thread = Thread(target=self.client.run)
-        thread.daemon = True
-        thread.start()
+            client.dispatch('alert')
+        else:
+            if __DEBUG__:
+                print('not online')
 
-        while True:
-            if all([check(addr) for addr in login_address]):
-                if __DEBUG__:
-                    print('maple online')
+checker = Thread(target=check_servers)
+checker.daemon = True
+checker.start()
 
-                self.alert()
-            else:
-                if __DEBUG__:
-                    print('not online')
-            
-            time.sleep(delay)
-
-bot = Bot()
-bot.run()
+client.run()
