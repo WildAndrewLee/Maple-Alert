@@ -23,12 +23,11 @@ def check(address):
     port = address.split(':')[1]
     
     try:
+        # 0.5 second timeout
         s = socket.create_connection((addr, port), 0.5)
         s.close()
         return True
     except:
-        import traceback
-        traceback.print_exc()
         return False
 
 client = Client()
@@ -63,7 +62,7 @@ def on_message(message):
                 dedent(
                     '''
                     You are now on the alert list.
-                    Send "cancel" in private message to remove yourself from the list.
+                    Type "cancel" to remove yourself from the list.
                     '''
                 ).strip()
             )
@@ -86,7 +85,7 @@ def on_message(message):
 def check_servers():
     while True:
         # let the discord client connect
-        # time.sleep(delay)
+        time.sleep(delay)
 
         if any([check(addr) for addr in login_address]):
             if __DEBUG__:

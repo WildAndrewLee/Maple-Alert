@@ -23,4 +23,9 @@ def remove_user(user):
     __db.set('to_notify', ' '.join(users))
 
 if __name__ == '__main__':
-    print(get_users())
+    import sys
+
+    if sys.argv[1] == 'list':
+        print(get_users())
+    elif sys.argv[2] == 'drop':
+        clear_users()
