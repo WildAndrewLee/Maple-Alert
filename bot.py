@@ -1,4 +1,3 @@
-import asyncio
 import socket
 import sys
 import time
@@ -33,9 +32,8 @@ def check(address):
 client = Client()
 client.login(secrets.email, secrets.password)
 
-@asyncio.coroutine
 @client.event
-def on_alert():
+async def on_alert():
     users = get_users()
 
     for user in users:
@@ -44,9 +42,8 @@ def on_alert():
 
     clear_users()
 
-@asyncio.coroutine
 @client.event
-def on_message(message):
+async def on_message(message):
     if message.channel.is_private:
         if message.content == 'cancel':
             remove_user(message.author)
